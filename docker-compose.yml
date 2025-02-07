@@ -1,0 +1,51 @@
+services:
+    app:
+        build: .
+        container_name: laravel_app
+        ports:
+            - "9000:80" # Access application on port 9000
+        volumes:
+            - .:/var/www/html
+            - storage_data:/var/www/html/storage
+            - cache_data:/var/www/html/bootstrap/cache
+        networks:
+            - app_network
+        environment:
+             - APP_ENV=local
+             - APP_DEBUG=true
+             - DB_HOST=db
+             - DB_PORT=3306
+             - DB_DATABASE=laravel_db
+             - DB_USERNAME=laravel_user
+             - DB_PASSWORD=laravel_password
+        depends_on:
+            - db
+        mem_limit: "2G"
+        cpus: "1"
+
+    db:
+        image: mysql:8.0
+        container_name: mysql_db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: laravel_db
+            MYSQL_ROOT_PASSWORD: root_password
+            MYSQL_USER: laravel_user
+            MYSQL_PASSWORD: laravel_password
+        ports:
+            - "3307:3306" # MySQL accessible on port 3307
+        volumes:
+            - db_data:/var/lib/mysql
+        networks:
+            - app_network
+        mem_limit: "2G"
+        cpus: "1"
+
+volumes:
+    db_data:
+    storage_data:
+    cache_data:
+
+networks:
+    app_network:
+        driver: bridge
